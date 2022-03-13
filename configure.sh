@@ -184,12 +184,15 @@ verify_metallb() {
 }
 
 verify_git_repository() {
+    local git_url=
     _has_envar "BOOTSTRAP_GIT_REPOSITORY"
+
+    git_url=${BOOTSTRAP_GIT_REPOSITORY#"ssh://"}
 
     export GIT_TERMINAL_PROMPT=0
     pushd "$(mktemp -d)" >/dev/null 2>&1
-    [ "$(git ls-remote "${BOOTSTRAP_GIT_REPOSITORY}" 2> /dev/null)" ] || {
-        _log "ERROR" "Unable to find the remote Git repository '${BOOTSTRAP_GIT_REPOSITORY}'"
+    [ "$(git ls-remote "${git_url}" 2> /dev/null)" ] || {
+        _log "ERROR" "Unable to find the remote Git repository '${git_url}'"
         exit 1
     }
     popd >/dev/null 2>&1
@@ -229,7 +232,7 @@ verify_ansible_hosts() {
     local node_hostname=
     local default_control_node_prefix=
     local default_worker_node_prefix=
-    
+
     default_control_node_prefix="BOOTSTRAP_ANSIBLE_DEFAULT_CONTROL_NODE_HOSTNAME_PREFIX"
     default_worker_node_prefix="BOOTSTRAP_ANSIBLE_DEFAULT_NODE_HOSTNAME_PREFIX"
     _has_optional_envar "${default_control_node_prefix}"
